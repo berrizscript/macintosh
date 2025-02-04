@@ -1,6 +1,21 @@
 local Library = {}
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+
+-- Lucide Icons
+local LucideIcons = {
+    home = "rbxassetid://10723424505",
+    settings = "rbxassetid://10723423143",
+    user = "rbxassetid://10723403981",
+    plus = "rbxassetid://10723403025",
+    minus = "rbxassetid://10723404681",
+    check = "rbxassetid://10723392537",
+    x = "rbxassetid://10723393913",
+    search = "rbxassetid://10723392252",
+    bell = "rbxassetid://10723392772",
+    -- Add more icons as needed
+}
 
 -- Utility functions
 local function CreateTween(instance, properties, duration)
@@ -9,14 +24,12 @@ local function CreateTween(instance, properties, duration)
     return tween
 end
 
--- Create rounded corner effect
 local function ApplyCorners(instance, radius)
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(radius, 0)
     UICorner.Parent = instance
 end
 
--- Create button shadow effect
 local function CreateButtonShadow(button)
     local Shadow = Instance.new("Frame")
     Shadow.Name = "Shadow"
@@ -30,34 +43,29 @@ local function CreateButtonShadow(button)
     Shadow.Parent = button
 end
 
--- UI Elements
-Library.Elements = {}
-
 function Library:CreateWindow(title)
-    -- Main GUI
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
     local TitleBar = Instance.new("Frame")
     local Title = Instance.new("TextLabel")
     local CloseButton = Instance.new("TextButton")
     local MinimizeButton = Instance.new("TextButton")
+    local TabBar = Instance.new("Frame")
+    local TabContainer = Instance.new("Frame")
     local ContentFrame = Instance.new("Frame")
-    local TabHolder = Instance.new("Frame")
-    local TabContent = Instance.new("Frame")
     
     ScreenGui.Name = "MacOSLibrary"
     ScreenGui.Parent = game.CoreGui
     
-    -- Configure MainFrame with squircle shape
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 600, 0, 400)
     MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
     MainFrame.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
     MainFrame.BorderSizePixel = 0
-    ApplyCorners(MainFrame, 0.025) -- Squircle shape
+    ApplyCorners(MainFrame, 0.025)
     MainFrame.Parent = ScreenGui
     
-    -- Add window shadow
+    -- Window shadow
     local WindowShadow = Instance.new("Frame")
     WindowShadow.Name = "WindowShadow"
     WindowShadow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -69,7 +77,6 @@ function Library:CreateWindow(title)
     ApplyCorners(WindowShadow, 0.025)
     WindowShadow.Parent = MainFrame
     
-    -- Configure TitleBar
     TitleBar.Name = "TitleBar"
     TitleBar.Size = UDim2.new(1, 0, 0, 30)
     TitleBar.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
@@ -77,7 +84,6 @@ function Library:CreateWindow(title)
     ApplyCorners(TitleBar, 0.025)
     TitleBar.Parent = MainFrame
     
-    -- Configure Title
     Title.Name = "Title"
     Title.Text = title or "Window"
     Title.Size = UDim2.new(1, -100, 1, 0)
@@ -88,62 +94,48 @@ function Library:CreateWindow(title)
     Title.Font = Enum.Font.SourceSansBold
     Title.Parent = TitleBar
     
-    -- Configure Close Button (circle)
     CloseButton.Name = "CloseButton"
     CloseButton.Size = UDim2.new(0, 12, 0, 12)
     CloseButton.Position = UDim2.new(0, 8, 0, 9)
     CloseButton.BackgroundColor3 = Color3.fromRGB(255, 95, 87)
     CloseButton.Text = ""
     CloseButton.BorderSizePixel = 0
-    ApplyCorners(CloseButton, 0.5) -- Make it circular
+    ApplyCorners(CloseButton, 0.5)
     CloseButton.Parent = TitleBar
     
-    -- Configure Minimize Button (circle)
     MinimizeButton.Name = "MinimizeButton"
     MinimizeButton.Size = UDim2.new(0, 12, 0, 12)
     MinimizeButton.Position = UDim2.new(0, 28, 0, 9)
     MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 189, 46)
     MinimizeButton.Text = ""
     MinimizeButton.BorderSizePixel = 0
-    ApplyCorners(MinimizeButton, 0.5) -- Make it circular
+    ApplyCorners(MinimizeButton, 0.5)
     MinimizeButton.Parent = TitleBar
     
-    -- Configure Content Frame
+    -- Tab Bar (new)
+    TabBar.Name = "TabBar"
+    TabBar.Size = UDim2.new(1, 0, 0, 40)
+    TabBar.Position = UDim2.new(0, 0, 0, 30)
+    TabBar.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    TabBar.BorderSizePixel = 0
+    TabBar.Parent = MainFrame
+    
+    -- Tab Container
+    TabContainer.Name = "TabContainer"
+    TabContainer.Size = UDim2.new(1, 0, 1, 0)
+    TabContainer.BackgroundTransparency = 1
+    TabContainer.Parent = TabBar
+    
+    -- Content Frame (adjusted position)
     ContentFrame.Name = "ContentFrame"
-    ContentFrame.Size = UDim2.new(1, 0, 1, -30)
-    ContentFrame.Position = UDim2.new(0, 0, 0, 30)
+    ContentFrame.Size = UDim2.new(1, 0, 1, -70)  -- Adjusted for TitleBar + TabBar
+    ContentFrame.Position = UDim2.new(0, 0, 0, 70)
     ContentFrame.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
     
-    -- Configure Tab Holder with subtle gradient
-    TabHolder.Name = "TabHolder"
-    TabHolder.Size = UDim2.new(0, 150, 1, 0)
-    TabHolder.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-    TabHolder.BorderSizePixel = 0
-    TabHolder.Parent = ContentFrame
-    
-    -- Add subtle gradient to TabHolder
-    local UIGradient = Instance.new("UIGradient")
-    UIGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 240, 240)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(235, 235, 235))
-    })
-    UIGradient.Parent = TabHolder
-    
-    -- Configure Tab Content
-    TabContent.Name = "TabContent"
-    TabContent.Size = UDim2.new(1, -150, 1, 0)
-    TabContent.Position = UDim2.new(0, 150, 0, 0)
-    TabContent.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
-    TabContent.BorderSizePixel = 0
-    TabContent.Parent = ContentFrame
-    
-    -- Make window draggable
-    local dragging
-    local dragInput
-    local dragStart
-    local startPos
+    -- Window dragging
+    local dragging, dragInput, dragStart, startPos
     
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -172,15 +164,6 @@ function Library:CreateWindow(title)
         end
     end)
     
-    -- Close button functionality with hover effect
-    CloseButton.MouseEnter:Connect(function()
-        CreateTween(CloseButton, {BackgroundColor3 = Color3.fromRGB(255, 75, 67)}):Play()
-    end)
-    
-    CloseButton.MouseLeave:Connect(function()
-        CreateTween(CloseButton, {BackgroundColor3 = Color3.fromRGB(255, 95, 87)}):Play()
-    end)
-    
     CloseButton.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
     end)
@@ -193,21 +176,21 @@ function Library:CreateWindow(title)
         local tab = {}
         window.TabCount = window.TabCount + 1
         
-        -- Create tab button with modern styling
+        -- Create tab button
         local TabButton = Instance.new("TextButton")
         TabButton.Name = name.."Tab"
-        TabButton.Size = UDim2.new(0.9, 0, 0, 35)
-        TabButton.Position = UDim2.new(0.05, 0, 0, (window.TabCount-1) * 40)
-        TabButton.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+        TabButton.Size = UDim2.new(0, 100, 1, -10)
+        TabButton.Position = UDim2.new(0, (window.TabCount-1) * 110 + 10, 0, 5)
+        TabButton.BackgroundColor3 = window.TabCount == 1 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(245, 245, 245)
         TabButton.Text = name
         TabButton.TextColor3 = Color3.fromRGB(70, 70, 70)
         TabButton.TextSize = 14
         TabButton.Font = Enum.Font.SourceSansSemibold
         TabButton.BorderSizePixel = 0
         ApplyCorners(TabButton, 0.15)
-        TabButton.Parent = TabHolder
+        TabButton.Parent = TabContainer
         
-        -- Create tab content frame
+        -- Create tab content
         local TabFrame = Instance.new("ScrollingFrame")
         TabFrame.Name = name.."Content"
         TabFrame.Size = UDim2.new(1, -20, 1, -20)
@@ -216,7 +199,7 @@ function Library:CreateWindow(title)
         TabFrame.BorderSizePixel = 0
         TabFrame.ScrollBarThickness = 4
         TabFrame.Visible = window.TabCount == 1
-        TabFrame.Parent = TabContent
+        TabFrame.Parent = ContentFrame
         
         local UIListLayout = Instance.new("UIListLayout")
         UIListLayout.Parent = TabFrame
@@ -224,40 +207,55 @@ function Library:CreateWindow(title)
         UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         
         TabButton.MouseButton1Click:Connect(function()
-            for _, v in pairs(TabContent:GetChildren()) do
-                v.Visible = false
+            for _, v in pairs(ContentFrame:GetChildren()) do
+                if v:IsA("ScrollingFrame") then
+                    v.Visible = false
+                end
             end
             TabFrame.Visible = true
             
-            -- Highlight active tab
-            for _, v in pairs(TabHolder:GetChildren()) do
+            for _, v in pairs(TabContainer:GetChildren()) do
                 if v:IsA("TextButton") then
-                    CreateTween(v, {BackgroundColor3 = Color3.fromRGB(240, 240, 240)}):Play()
+                    CreateTween(v, {BackgroundColor3 = Color3.fromRGB(245, 245, 245)}):Play()
                 end
             end
-            CreateTween(TabButton, {BackgroundColor3 = Color3.fromRGB(220, 220, 220)}):Play()
+            CreateTween(TabButton, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
         end)
         
-        function tab:CreateButton(text, callback)
+        function tab:CreateButton(text, icon, callback)
             local Button = Instance.new("TextButton")
             Button.Name = text.."Button"
             Button.Size = UDim2.new(0.9, 0, 0, 35)
             Button.Position = UDim2.new(0.05, 0, 0, 0)
-            Button.BackgroundColor3 = Color3.fromRGB(0, 122, 255) -- Apple Blue
-            Button.Text = text
+            Button.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
             Button.TextColor3 = Color3.fromRGB(255, 255, 255)
             Button.TextSize = 14
             Button.Font = Enum.Font.SourceSansSemibold
             Button.BorderSizePixel = 0
             ApplyCorners(Button, 0.25)
             CreateButtonShadow(Button)
+            
+            -- Add icon if provided
+            if icon and LucideIcons[icon:lower()] then
+                local Icon = Instance.new("ImageLabel")
+                Icon.Size = UDim2.new(0, 16, 0, 16)
+                Icon.Position = UDim2.new(0, 10, 0.5, -8)
+                Icon.BackgroundTransparency = 1
+                Icon.Image = LucideIcons[icon:lower()]
+                Icon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+                Icon.Parent = Button
+                
+                Button.Text = "    " .. text  -- Add padding for icon
+            else
+                Button.Text = text
+            end
+            
             Button.Parent = TabFrame
             
             Button.MouseButton1Click:Connect(function()
                 if callback then callback() end
             end)
             
-            -- Modern hover effect
             Button.MouseEnter:Connect(function()
                 CreateTween(Button, {BackgroundColor3 = Color3.fromRGB(0, 102, 235)}):Play()
             end)
