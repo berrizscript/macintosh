@@ -3,21 +3,41 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 
--- Lucide Icons
-local LucideIcons = {
-    home = "rbxassetid://10723424505",
-    settings = "rbxassetid://10723423143",
-    user = "rbxassetid://10723403981",
-    plus = "rbxassetid://10723403025",
-    minus = "rbxassetid://10723404681",
-    check = "rbxassetid://10723392537",
-    x = "rbxassetid://10723393913",
-    search = "rbxassetid://10723392252",
-    bell = "rbxassetid://10723392772",
-    -- Add more icons as needed
-}
+-- Function to convert Lucide icon name to SVG path data
+local function getLucideIconPath(iconName)
+    -- This function would contain a mapping of Lucide icon names to their SVG path data
+    -- You would need to maintain this data from https://lucide.dev
+    local icons = {
+        -- Example format (you can add more from lucide.dev):
+        ["home"] = "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+        ["settings"] = "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+        ["user"] = "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 1 0 0-8z",
+        -- Add more icons as needed from lucide.dev
+    }
+    return icons[iconName:lower()]
+end
 
--- Utility functions
+-- Create SVG Icon
+local function CreateSvgIcon(pathData, parent, size, color)
+    local Icon = Instance.new("Frame")
+    Icon.Size = UDim2.new(0, size, 0, size)
+    Icon.BackgroundTransparency = 1
+    Icon.Name = "Icon"
+
+    -- Create the SVG path using frame shapes
+    -- This is a simplified version - you'd need to implement proper SVG path parsing
+    local Path = Instance.new("Frame")
+    Path.Size = UDim2.new(1, 0, 1, 0)
+    Path.BackgroundColor3 = color
+    Path.BackgroundTransparency = 0
+    ApplyCorners(Path, 1) -- Make it round for now
+    Path.Parent = Icon
+
+    Icon.Parent = parent
+    return Icon
+end
+
+-- Utility functions (unchanged from before)
 local function CreateTween(instance, properties, duration)
     local tweenInfo = TweenInfo.new(duration or 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tween = TweenService:Create(instance, tweenInfo, properties)
@@ -30,241 +50,71 @@ local function ApplyCorners(instance, radius)
     UICorner.Parent = instance
 end
 
-local function CreateButtonShadow(button)
-    local Shadow = Instance.new("Frame")
-    Shadow.Name = "Shadow"
-    Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    Shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Shadow.BackgroundTransparency = 0.9
-    Shadow.Position = UDim2.new(0.5, 0, 0.5, 1)
-    Shadow.Size = UDim2.new(1, 0, 1, 0)
-    Shadow.ZIndex = button.ZIndex - 1
-    ApplyCorners(Shadow, 0.25)
-    Shadow.Parent = button
-end
+[... rest of your existing window creation code remains the same until the button creation part ...]
 
-function Library:CreateWindow(title)
-    local ScreenGui = Instance.new("ScreenGui")
-    local MainFrame = Instance.new("Frame")
-    local TitleBar = Instance.new("Frame")
-    local Title = Instance.new("TextLabel")
-    local CloseButton = Instance.new("TextButton")
-    local MinimizeButton = Instance.new("TextButton")
-    local TabBar = Instance.new("Frame")
-    local TabContainer = Instance.new("Frame")
-    local ContentFrame = Instance.new("Frame")
-    
-    ScreenGui.Name = "MacOSLibrary"
-    ScreenGui.Parent = game.CoreGui
-    
-    MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 600, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
-    MainFrame.BorderSizePixel = 0
-    ApplyCorners(MainFrame, 0.025)
-    MainFrame.Parent = ScreenGui
-    
-    -- Window shadow
-    local WindowShadow = Instance.new("Frame")
-    WindowShadow.Name = "WindowShadow"
-    WindowShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    WindowShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    WindowShadow.BackgroundTransparency = 0.8
-    WindowShadow.Position = UDim2.new(0.5, 0, 0.5, 2)
-    WindowShadow.Size = UDim2.new(1, 10, 1, 10)
-    WindowShadow.ZIndex = MainFrame.ZIndex - 1
-    ApplyCorners(WindowShadow, 0.025)
-    WindowShadow.Parent = MainFrame
-    
-    TitleBar.Name = "TitleBar"
-    TitleBar.Size = UDim2.new(1, 0, 0, 30)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
-    TitleBar.BorderSizePixel = 0
-    ApplyCorners(TitleBar, 0.025)
-    TitleBar.Parent = MainFrame
-    
-    Title.Name = "Title"
-    Title.Text = title or "Window"
-    Title.Size = UDim2.new(1, -100, 1, 0)
-    Title.Position = UDim2.new(0, 50, 0, 0)
-    Title.BackgroundTransparency = 1
-    Title.TextColor3 = Color3.fromRGB(70, 70, 70)
-    Title.TextSize = 14
-    Title.Font = Enum.Font.SourceSansBold
-    Title.Parent = TitleBar
-    
-    CloseButton.Name = "CloseButton"
-    CloseButton.Size = UDim2.new(0, 12, 0, 12)
-    CloseButton.Position = UDim2.new(0, 8, 0, 9)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 95, 87)
-    CloseButton.Text = ""
-    CloseButton.BorderSizePixel = 0
-    ApplyCorners(CloseButton, 0.5)
-    CloseButton.Parent = TitleBar
-    
-    MinimizeButton.Name = "MinimizeButton"
-    MinimizeButton.Size = UDim2.new(0, 12, 0, 12)
-    MinimizeButton.Position = UDim2.new(0, 28, 0, 9)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 189, 46)
-    MinimizeButton.Text = ""
-    MinimizeButton.BorderSizePixel = 0
-    ApplyCorners(MinimizeButton, 0.5)
-    MinimizeButton.Parent = TitleBar
-    
-    -- Tab Bar (new)
-    TabBar.Name = "TabBar"
-    TabBar.Size = UDim2.new(1, 0, 0, 40)
-    TabBar.Position = UDim2.new(0, 0, 0, 30)
-    TabBar.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
-    TabBar.BorderSizePixel = 0
-    TabBar.Parent = MainFrame
-    
-    -- Tab Container
-    TabContainer.Name = "TabContainer"
-    TabContainer.Size = UDim2.new(1, 0, 1, 0)
-    TabContainer.BackgroundTransparency = 1
-    TabContainer.Parent = TabBar
-    
-    -- Content Frame (adjusted position)
-    ContentFrame.Name = "ContentFrame"
-    ContentFrame.Size = UDim2.new(1, 0, 1, -70)  -- Adjusted for TitleBar + TabBar
-    ContentFrame.Position = UDim2.new(0, 0, 0, 70)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
-    ContentFrame.BorderSizePixel = 0
-    ContentFrame.Parent = MainFrame
-    
-    -- Window dragging
-    local dragging, dragInput, dragStart, startPos
-    
-    TitleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-        end
-    end)
-    
-    TitleBar.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-    
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if dragging and dragInput then
-            local delta = dragInput.Position - dragStart
-            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    
-    CloseButton.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
-    
-    local window = {}
-    window.Tabs = {}
-    window.TabCount = 0
-    
-    function window:CreateTab(name)
-        local tab = {}
-        window.TabCount = window.TabCount + 1
-        
-        -- Create tab button
-        local TabButton = Instance.new("TextButton")
-        TabButton.Name = name.."Tab"
-        TabButton.Size = UDim2.new(0, 100, 1, -10)
-        TabButton.Position = UDim2.new(0, (window.TabCount-1) * 110 + 10, 0, 5)
-        TabButton.BackgroundColor3 = window.TabCount == 1 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(245, 245, 245)
-        TabButton.Text = name
-        TabButton.TextColor3 = Color3.fromRGB(70, 70, 70)
-        TabButton.TextSize = 14
-        TabButton.Font = Enum.Font.SourceSansSemibold
-        TabButton.BorderSizePixel = 0
-        ApplyCorners(TabButton, 0.15)
-        TabButton.Parent = TabContainer
-        
-        -- Create tab content
-        local TabFrame = Instance.new("ScrollingFrame")
-        TabFrame.Name = name.."Content"
-        TabFrame.Size = UDim2.new(1, -20, 1, -20)
-        TabFrame.Position = UDim2.new(0, 10, 0, 10)
-        TabFrame.BackgroundTransparency = 1
-        TabFrame.BorderSizePixel = 0
-        TabFrame.ScrollBarThickness = 4
-        TabFrame.Visible = window.TabCount == 1
-        TabFrame.Parent = ContentFrame
-        
-        local UIListLayout = Instance.new("UIListLayout")
-        UIListLayout.Parent = TabFrame
-        UIListLayout.Padding = UDim.new(0, 8)
-        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        
-        TabButton.MouseButton1Click:Connect(function()
-            for _, v in pairs(ContentFrame:GetChildren()) do
-                if v:IsA("ScrollingFrame") then
-                    v.Visible = false
-                end
-            end
-            TabFrame.Visible = true
-            
-            for _, v in pairs(TabContainer:GetChildren()) do
-                if v:IsA("TextButton") then
-                    CreateTween(v, {BackgroundColor3 = Color3.fromRGB(245, 245, 245)}):Play()
-                end
-            end
-            CreateTween(TabButton, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        end)
-        
-        function tab:CreateButton(text, icon, callback)
+        function tab:CreateButton(text, iconName, callback)
             local Button = Instance.new("TextButton")
             Button.Name = text.."Button"
             Button.Size = UDim2.new(0.9, 0, 0, 35)
             Button.Position = UDim2.new(0.05, 0, 0, 0)
             Button.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
             Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Button.TextSize = 14
-            Button.Font = Enum.Font.SourceSansSemibold
+            Button.TextSize = 13 -- Slightly smaller for Apple-like appearance
+            Button.Font = Enum.Font.GothamMedium -- More Apple-like font
             Button.BorderSizePixel = 0
-            ApplyCorners(Button, 0.25)
-            CreateButtonShadow(Button)
+            ApplyCorners(Button, 0.3) -- More curved corners
             
             -- Add icon if provided
-            if icon and LucideIcons[icon:lower()] then
-                local Icon = Instance.new("ImageLabel")
-                Icon.Size = UDim2.new(0, 16, 0, 16)
-                Icon.Position = UDim2.new(0, 10, 0.5, -8)
-                Icon.BackgroundTransparency = 1
-                Icon.Image = LucideIcons[icon:lower()]
-                Icon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-                Icon.Parent = Button
-                
-                Button.Text = "    " .. text  -- Add padding for icon
+            if iconName then
+                local iconPath = getLucideIconPath(iconName)
+                if iconPath then
+                    local Icon = CreateSvgIcon(iconPath, Button, 16, Color3.fromRGB(255, 255, 255))
+                    Icon.Position = UDim2.new(0, 10, 0.5, -8)
+                    Button.Text = "    " .. text  -- Add padding for icon
+                else
+                    Button.Text = text
+                end
             else
                 Button.Text = text
             end
             
             Button.Parent = TabFrame
             
-            Button.MouseButton1Click:Connect(function()
-                if callback then callback() end
-            end)
+            -- Add modern hover effect
+            local hoverOverlay = Instance.new("Frame")
+            hoverOverlay.Size = UDim2.new(1, 0, 1, 0)
+            hoverOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            hoverOverlay.BackgroundTransparency = 1
+            hoverOverlay.BorderSizePixel = 0
+            ApplyCorners(hoverOverlay, 0.3)
+            hoverOverlay.Parent = Button
             
             Button.MouseEnter:Connect(function()
-                CreateTween(Button, {BackgroundColor3 = Color3.fromRGB(0, 102, 235)}):Play()
+                CreateTween(hoverOverlay, {BackgroundTransparency = 0.9}):Play()
             end)
             
             Button.MouseLeave:Connect(function()
-                CreateTween(Button, {BackgroundColor3 = Color3.fromRGB(0, 122, 255)}):Play()
+                CreateTween(hoverOverlay, {BackgroundTransparency = 1}):Play()
+            end)
+            
+            Button.MouseButton1Click:Connect(function()
+                -- Add click effect
+                local clickOverlay = Instance.new("Frame")
+                clickOverlay.Size = UDim2.new(1, 0, 1, 0)
+                clickOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                clickOverlay.BackgroundTransparency = 0.7
+                clickOverlay.BorderSizePixel = 0
+                ApplyCorners(clickOverlay, 0.3)
+                clickOverlay.Parent = Button
+                
+                CreateTween(clickOverlay, {BackgroundTransparency = 1}, 0.2):Play()
+                wait(0.2)
+                clickOverlay:Destroy()
+                
+                if callback then callback() end
             end)
         end
-        
+
         function tab:CreateLabel(text)
             local Label = Instance.new("TextLabel")
             Label.Name = text.."Label"
@@ -273,15 +123,11 @@ function Library:CreateWindow(title)
             Label.BackgroundTransparency = 1
             Label.Text = text
             Label.TextColor3 = Color3.fromRGB(70, 70, 70)
-            Label.TextSize = 14
-            Label.Font = Enum.Font.SourceSansSemibold
+            Label.TextSize = 13 -- Slightly smaller for Apple-like appearance
+            Label.Font = Enum.Font.GothamMedium -- More Apple-like font
             Label.Parent = TabFrame
         end
-        
-        return tab
-    end
-    
-    return window
-end
+
+[... rest of the library code remains the same ...]
 
 return Library
