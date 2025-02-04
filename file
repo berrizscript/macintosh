@@ -1,0 +1,227 @@
+local Library = {}
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Utility functions
+local function CreateTween(instance, properties, duration)
+    local tweenInfo = TweenInfo.new(duration or 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(instance, tweenInfo, properties)
+    return tween
+end
+
+-- UI Elements
+Library.Elements = {}
+
+function Library:CreateWindow(title)
+    -- Main GUI
+    local ScreenGui = Instance.new("ScreenGui")
+    local MainFrame = Instance.new("Frame")
+    local TitleBar = Instance.new("Frame")
+    local Title = Instance.new("TextLabel")
+    local CloseButton = Instance.new("TextButton")
+    local MinimizeButton = Instance.new("TextButton")
+    local ContentFrame = Instance.new("Frame")
+    local TabHolder = Instance.new("Frame")
+    local TabContent = Instance.new("Frame")
+    
+    -- Configure ScreenGui
+    ScreenGui.Name = "MacOSLibrary"
+    ScreenGui.Parent = game.CoreGui
+    
+    -- Configure MainFrame
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 600, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = ScreenGui
+    
+    -- Configure TitleBar
+    TitleBar.Name = "TitleBar"
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+    
+    -- Configure Title
+    Title.Name = "Title"
+    Title.Text = title or "Window"
+    Title.Size = UDim2.new(1, -100, 1, 0)
+    Title.Position = UDim2.new(0, 50, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.TextColor3 = Color3.fromRGB(70, 70, 70)
+    Title.TextSize = 14
+    Title.Font = Enum.Font.SourceSansBold
+    Title.Parent = TitleBar
+    
+    -- Configure Close Button
+    CloseButton.Name = "CloseButton"
+    CloseButton.Size = UDim2.new(0, 12, 0, 12)
+    CloseButton.Position = UDim2.new(0, 8, 0, 9)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 95, 87)
+    CloseButton.Text = ""
+    CloseButton.BorderSizePixel = 0
+    CloseButton.Parent = TitleBar
+    
+    -- Configure Minimize Button
+    MinimizeButton.Name = "MinimizeButton"
+    MinimizeButton.Size = UDim2.new(0, 12, 0, 12)
+    MinimizeButton.Position = UDim2.new(0, 28, 0, 9)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 189, 46)
+    MinimizeButton.Text = ""
+    MinimizeButton.BorderSizePixel = 0
+    MinimizeButton.Parent = TitleBar
+    
+    -- Configure Content Frame
+    ContentFrame.Name = "ContentFrame"
+    ContentFrame.Size = UDim2.new(1, 0, 1, -30)
+    ContentFrame.Position = UDim2.new(0, 0, 0, 30)
+    ContentFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    ContentFrame.BorderSizePixel = 0
+    ContentFrame.Parent = MainFrame
+    
+    -- Configure Tab Holder
+    TabHolder.Name = "TabHolder"
+    TabHolder.Size = UDim2.new(0, 150, 1, 0)
+    TabHolder.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
+    TabHolder.BorderSizePixel = 0
+    TabHolder.Parent = ContentFrame
+    
+    -- Configure Tab Content
+    TabContent.Name = "TabContent"
+    TabContent.Size = UDim2.new(1, -150, 1, 0)
+    TabContent.Position = UDim2.new(0, 150, 0, 0)
+    TabContent.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    TabContent.BorderSizePixel = 0
+    TabContent.Parent = ContentFrame
+    
+    -- Make window draggable
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+    
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+        end
+    end)
+    
+    TitleBar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+    
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if dragging and dragInput then
+            local delta = dragInput.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    -- Close button functionality
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    
+    local window = {}
+    window.Tabs = {}
+    window.TabCount = 0
+    
+    function window:CreateTab(name)
+        local tab = {}
+        window.TabCount = window.TabCount + 1
+        
+        -- Create tab button
+        local TabButton = Instance.new("TextButton")
+        TabButton.Name = name.."Tab"
+        TabButton.Size = UDim2.new(1, 0, 0, 35)
+        TabButton.Position = UDim2.new(0, 0, 0, (window.TabCount-1) * 35)
+        TabButton.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
+        TabButton.Text = name
+        TabButton.TextColor3 = Color3.fromRGB(70, 70, 70)
+        TabButton.TextSize = 14
+        TabButton.Font = Enum.Font.SourceSans
+        TabButton.BorderSizePixel = 0
+        TabButton.Parent = TabHolder
+        
+        -- Create tab content frame
+        local TabFrame = Instance.new("ScrollingFrame")
+        TabFrame.Name = name.."Content"
+        TabFrame.Size = UDim2.new(1, 0, 1, 0)
+        TabFrame.BackgroundTransparency = 1
+        TabFrame.BorderSizePixel = 0
+        TabFrame.ScrollBarThickness = 4
+        TabFrame.Visible = window.TabCount == 1
+        TabFrame.Parent = TabContent
+        
+        -- Configure auto-sizing for content
+        local UIListLayout = Instance.new("UIListLayout")
+        UIListLayout.Parent = TabFrame
+        UIListLayout.Padding = UDim.new(0, 5)
+        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        -- Tab button click handler
+        TabButton.MouseButton1Click:Connect(function()
+            for _, v in pairs(TabContent:GetChildren()) do
+                v.Visible = false
+            end
+            TabFrame.Visible = true
+        end)
+        
+        function tab:CreateButton(text, callback)
+            local Button = Instance.new("TextButton")
+            Button.Name = text.."Button"
+            Button.Size = UDim2.new(0.9, 0, 0, 35)
+            Button.Position = UDim2.new(0.05, 0, 0, 0)
+            Button.BackgroundColor3 = Color3.fromRGB(65, 165, 235)
+            Button.Text = text
+            Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Button.TextSize = 14
+            Button.Font = Enum.Font.SourceSans
+            Button.BorderSizePixel = 0
+            Button.Parent = TabFrame
+            
+            Button.MouseButton1Click:Connect(function()
+                if callback then callback() end
+            end)
+            
+            -- Hover effect
+            Button.MouseEnter:Connect(function()
+                CreateTween(Button, {BackgroundColor3 = Color3.fromRGB(45, 145, 215)}):Play()
+            end)
+            
+            Button.MouseLeave:Connect(function()
+                CreateTween(Button, {BackgroundColor3 = Color3.fromRGB(65, 165, 235)}):Play()
+            end)
+        end
+        
+        function tab:CreateLabel(text)
+            local Label = Instance.new("TextLabel")
+            Label.Name = text.."Label"
+            Label.Size = UDim2.new(0.9, 0, 0, 25)
+            Label.Position = UDim2.new(0.05, 0, 0, 0)
+            Label.BackgroundTransparency = 1
+            Label.Text = text
+            Label.TextColor3 = Color3.fromRGB(70, 70, 70)
+            Label.TextSize = 14
+            Label.Font = Enum.Font.SourceSans
+            Label.Parent = TabFrame
+        end
+        
+        return tab
+    end
+    
+    return window
+end
+
+return Library
