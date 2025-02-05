@@ -35,5 +35,12 @@ name should not interfere with other tabs (same name) but name in gui can be the
 - Elements
 
 Here are all the elements you can put in a tab, make sure you make it the same name!
+```lua
+HomeTab:CreateButton("Simple Button", function()
+    print("Clicked!")
+end)
+```
+
+
 
 
