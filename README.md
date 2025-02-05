@@ -2,6 +2,8 @@ Welcome to the Macintosh UI Library!
 
 this readme file will help you operate this ui library for your own use!
 
+Develop Progress: 
+Alpha Test
 # How to use the ui!
 
 - To start, you will need to add the configure loadstring!
