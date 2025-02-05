@@ -13,5 +13,5 @@ you can change the title of the window too!
 ```lua
 local Window = Library:CreateWindow("Untitled Window")
 ```
-^ Change Untitled Window to your selected name.
+^ Change ”Untitled Window” to your selected name.
 
