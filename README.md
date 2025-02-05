@@ -17,3 +17,12 @@ local Window = Library:CreateWindow("Untitled Window")
 ```
 ^ Change ”Untitled Window” to your selected name.
 
+- Now that the window and configuration scripts are loaded, you need to add tabs to add elements!
+This creates the tab with the name as Untitled
+```lua
+local UntiitledTab = Window:CreateTab("Untitled")
+```
+fyi, you need to change the name, otherwise it will mess up other tabs.
+Example:
+`local OtherTab = Window:CreateTab("hello")`
+name should not interfere with other tabs (same name) but name in gui can be the same as a othee tab name in gui aswell
