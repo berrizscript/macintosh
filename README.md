@@ -28,3 +28,9 @@ fyi, you need to change the name, otherwise it will mess up other tabs.
 Example:
 `local OtherTab = Window:CreateTab("hello")`
 name should not interfere with other tabs (same name) but name in gui can be the same as a othee tab name in gui aswell
+
+- Elements
+
+Here are all the elements you can put in a tab, make sure you make it the same name!
+
+
